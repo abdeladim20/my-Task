@@ -46,5 +46,5 @@ func Connect() {
     log.Println("Database connection established.")
 
     // Apply migrations
-    ApplyMigrations()
+    // err := applyMigrations(db *sql.DB, dir string)
 }

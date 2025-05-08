@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strconv"
 	"time"
 
 	"social-network/backend/pkg/db/sqlite"
@@ -9,19 +10,24 @@ import (
 )
 
 type Post struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
 	Content   string    `json:"content"`
-	Image     *string   `json:"image"`
+	Image     *string   `json:"image,omitempty"`
+	Privacy   string    `json:"privacy"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Create a new post
 func (p *Post) Create() error {
+	var err error
 	id, _ := uuid.NewV4()
-	p.ID = id.String()
-	_, err := sqlite.DB.Exec(
+	p.ID, err = strconv.Atoi(id.String())
+	if err != nil {
+		return err
+	}
+	_, err = sqlite.DB.Exec(
 		`INSERT INTO posts (id, user_id, content, image) VALUES (?, ?, ?, ?)`,
 		p.ID, p.UserID, p.Content, p.Image,
 	)

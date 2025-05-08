@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"social-network/backend/pkg/db/sqlite"
+	"social-network/backend/routes"
 
 	"github.com/gorilla/mux"
 )
@@ -17,7 +18,7 @@ func main() {
 	router := mux.NewRouter()
 
 	// Register your routes
-	// routes.RegisterRoutes(router)
+	routes.RegisterRoutes(router)
 
 	// Start the server
 	log.Println("Server running on :8080")
