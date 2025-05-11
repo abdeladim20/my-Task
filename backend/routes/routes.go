@@ -15,4 +15,9 @@ func RegisterRoutes(router *mux.Router) {
 	// Post routes
 	router.HandleFunc("/posts", CreatePost).Methods("POST")
 	router.HandleFunc("/posts", GetPosts).Methods("GET")
+
+	// Comment routes
+	router.HandleFunc("/comments", CreateComment).Methods("POST")
+	router.HandleFunc("/posts/{postID}/comments", GetCommentsByPostID).Methods("GET")
+	
 }

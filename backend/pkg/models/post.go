@@ -1,12 +1,11 @@
 package models
 
 import (
-	"strconv"
+	"encoding/json"
+	"net/http"
 	"time"
 
 	"social-network/backend/pkg/db/sqlite"
-
-	"github.com/gofrs/uuid"
 )
 
 type Post struct {
@@ -17,39 +16,53 @@ type Post struct {
 	Privacy   string    `json:"privacy"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Comments  []Comment `json:"comments,omitempty"`
 }
 
 // Create a new post
 func (p *Post) Create() error {
-	var err error
-	id, _ := uuid.NewV4()
-	p.ID, err = strconv.Atoi(id.String())
+	res, err := sqlite.DB.Exec(
+		`INSERT INTO posts (user_id, content, image) VALUES (?, ?, ?)`,
+		p.UserID, p.Content, p.Image,
+	)
 	if err != nil {
 		return err
 	}
-	_, err = sqlite.DB.Exec(
-		`INSERT INTO posts (id, user_id, content, image) VALUES (?, ?, ?, ?)`,
-		p.ID, p.UserID, p.Content, p.Image,
-	)
-	return err
+
+	// Get the auto-generated ID from SQLite
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+	p.ID = int(lastID)
+	return nil
 }
 
 // Get all posts
-func GetAllPosts() ([]Post, error) {
-	rows, err := sqlite.DB.Query(`SELECT * FROM posts ORDER BY created_at DESC`)
+func GetPosts(w http.ResponseWriter, r *http.Request) {
+	rows, err := sqlite.DB.Query("SELECT id, user_id, content, image, privacy, created_at, updated_at FROM posts ORDER BY created_at DESC")
 	if err != nil {
-		return nil, err
+		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
+		return
 	}
 	defer rows.Close()
 
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Content, &post.Image, &post.CreatedAt, &post.UpdatedAt)
-		if err != nil {
-			return nil, err
+		if err := rows.Scan(&post.ID, &post.UserID, &post.Content, &post.Image, &post.Privacy, &post.CreatedAt, &post.UpdatedAt); err != nil {
+			continue
 		}
+
+		// Fetch comments for this post
+		comments, err := GetCommentsByPostID(post.ID)
+		if err == nil {
+			post.Comments = comments
+		}
+
 		posts = append(posts, post)
 	}
-	return posts, nil
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
 }

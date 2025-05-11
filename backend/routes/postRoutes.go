@@ -12,39 +12,25 @@ import (
 func CreatePost(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 
-	// Decode the JSON payload
+	// Decode JSON
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		log.Println("Invalid request payload:", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	// Check required fields
 	if post.UserID == 0 || post.Content == "" {
-		log.Println("UserID and Content are required")
 		http.Error(w, "UserID and Content are required", http.StatusBadRequest)
 		return
 	}
 
-	// Set the image to NULL if it's empty
-	if post.Image == nil {
-		post.Image = nil
-	}
-
-	// Insert the post into the database
-	res, err := sqlite.DB.Exec(
-		"INSERT INTO posts (user_id, content, image, privacy) VALUES (?, ?, NULLIF(?, 'NULL'), ?)",
-		post.UserID, post.Content, post.Image, post.Privacy,
-	)
-	if err != nil {
-		log.Println("Failed to create post:", err)
+	// Create post using model
+	if err := post.Create(); err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return
 	}
 
-	id, _ := res.LastInsertId()
-	post.ID = int(id)
-
+	// Return created post
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
 }

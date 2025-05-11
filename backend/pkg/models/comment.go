@@ -1,12 +1,9 @@
 package models
 
 import (
-	"strconv"
 	"time"
 
 	"social-network/backend/pkg/db/sqlite"
-
-	"github.com/gofrs/uuid"
 )
 
 type Comment struct {
@@ -20,22 +17,26 @@ type Comment struct {
 
 // Create a new comment
 func (c *Comment) Create() error {
-	id, _ := uuid.NewV4()
-    var err error
-	c.ID, err = strconv.Atoi(id.String()) // need to be int
-    if err != nil {
-        return err
-    }
-	_, err = sqlite.DB.Exec(
-		`INSERT INTO comments (id, post_id, user_id, content) VALUES (?, ?, ?, ?)`,
-		c.ID, c.PostID, c.UserID, c.Content,
+	res, err := sqlite.DB.Exec(
+		`INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)`,
+		c.PostID, c.UserID, c.Content,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	// Get the auto-generated ID from SQLite
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+	c.ID = int(lastID)
+	return nil
 }
 
 // Get comments by post ID
-func GetCommentsByPostID(postID string) ([]Comment, error) {
-	rows, err := sqlite.DB.Query(`SELECT * FROM comments WHERE post_id = ? ORDER BY created_at ASC`, postID)
+func GetCommentsByPostID(postID int) ([]Comment, error) {
+	// rows, err := sqlite.DB.Query(`SELECT * FROM comments WHERE post_id = ? ORDER BY created_at ASC`, postID)
+	rows, err := sqlite.DB.Query(`SELECT id, post_id, user_id, content, created_at, updated_at FROM comments WHERE post_id = ? ORDER BY created_at ASC`, postID)
 	if err != nil {
 		return nil, err
 	}
