@@ -36,7 +36,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPosts(w http.ResponseWriter, r *http.Request) {
-	rows, err := sqlite.DB.Query("SELECT id, user_id, content, image, privacy, created_at, updated_at FROM posts ORDER BY created_at DESC")
+	// ORDER BY created_at DESC
+	rows, err := sqlite.DB.Query("SELECT id, user_id, content, image, privacy, created_at, updated_at FROM posts")
 	if err != nil {
 		log.Println("Failed to fetch posts:", err)
 		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
