@@ -3,8 +3,8 @@
     <h2>Create Post</h2>
     <form @submit.prevent="createPost">
       <input v-model="userID" type="number" placeholder="User ID" required />
+      <textarea v-model="title" placeholder="Post title" required></textarea>
       <textarea v-model="content" placeholder="Post content" required></textarea>
-      <input v-model="image" type="text" placeholder="Image URL (optional)" />
       <select v-model="privacy">
         <option value="public">Public</option>
         <option value="private">Private</option>
@@ -19,15 +19,17 @@ export default {
   data() {
     return {
       userID: "",
+      title: "",
       content: "",
       image: "",
-      privacy: "public"
+      privacy: "public",
     };
   },
   methods: {
     async createPost() {
       const postData = {
         user_id: Number(this.userID),
+        title: this.title,
         content: this.content,
         image: this.image || null,
         privacy: this.privacy
