@@ -17,3 +17,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+h1 {
+  align-items: center;
+  text-align: center;
+}
+</style>

@@ -1,8 +1,7 @@
 <template>
-  <div>
+  <div class="post-container">
     <h2>Create Post</h2>
     <form @submit.prevent="createPost">
-      <input v-model="userID" type="number" placeholder="User ID" required />
       <textarea v-model="title" placeholder="Post title" required></textarea>
       <textarea v-model="content" placeholder="Post content" required></textarea>
       <select v-model="privacy">
@@ -46,3 +45,42 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.post-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem auto;
+  max-width: 500px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+textarea,
+select,
+button {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+</style>

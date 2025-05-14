@@ -38,37 +38,46 @@ export default {
       const posts = await res.json();
 
       // For each post, load its comments
-      for (const post of posts) {
-        const res = await fetch(`http://localhost:8080/comments/${post.id}`);
-        const comments = await res.json();
-        post.comments = comments;
-      }
+      // for (const post of posts) {
+      //   const res = await fetch(`http://localhost:8080/comments/${post.id}`);
+      //   const comments = await res.json();
+      //   post.comments = comments;
+      // }
 
       this.posts = posts;
     },
-    async createComment(postID) {
-      const content = this.newComments[postID];
-      if (!content) return alert("Write something first!");
+    // async createComment(postID) {
+    //   const content = this.newComments[postID];
+    //   if (!content) return alert("Write something first!");
 
-      const commentData = {
-        post_id: postID,
-        user_id: 1, // hardcoded user 1 for now
-        content: content
-      };
+    //   const commentData = {
+    //     post_id: postID,
+    //     user_id: 1, // hardcoded user 1 for now
+    //     content: content
+    //   };
 
-      await fetch("http://localhost:8080/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(commentData)
-      });
+    //   await fetch("http://localhost:8080/comments", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(commentData)
+    //   });
 
-      alert("Comment added!");
-      this.newComments[postID] = "";
-      this.fetchPosts(); // refresh posts & comments
-    }
+    //   alert("Comment added!");
+    //   this.newComments[postID] = "";
+    //   this.fetchPosts(); // refresh posts & comments
+    // }
   },
   mounted() {
     this.fetchPosts();
   }
 };
+
 </script>
+
+<style scoped>
+h2 {
+  align-items: center;
+  text-align: center;
+}
+
+</style>

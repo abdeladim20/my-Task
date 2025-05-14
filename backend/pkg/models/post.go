@@ -56,10 +56,10 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Fetch comments for this post
-		comments, err := GetCommentsByPostID(post.ID)
-		if err == nil {
-			post.Comments = comments
-		}
+		// comments, err := GetCommentsByPostID(post.ID)
+		// if err == nil {
+		// 	post.Comments = comments
+		// }
 
 		posts = append(posts, post)
 	}
