@@ -1,31 +1,44 @@
 package routes
 
-// func CreateComment(w http.ResponseWriter, r *http.Request) {
-// 	var comment models.Comment
-// 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
+import (
+	"encoding/json"
+	"net/http"
+	"social-network/backend/pkg/models"
+	"strconv"
 
-// 	if err := comment.Create(); err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+	"github.com/gorilla/mux"
+)
 
-// 	w.WriteHeader(http.StatusCreated)
-// 	json.NewEncoder(w).Encode(comment)
-// }
+func CreateComment(w http.ResponseWriter, r *http.Request) {
+	var comment models.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-// func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
-// 	// vars := mux.Vars(r)
-// 	// postID := vars["postID"]
-// 	var postID models.Post
+	if err := comment.Create(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// 	comments, err := models.GetCommentsByPostID(postID.ID)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(comment)
+}
 
-// 	json.NewEncoder(w).Encode(comments)
-// }
+func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postIdASstring := vars["postID"]
+	postID, err := strconv.Atoi(postIdASstring)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	comments, err := models.GetCommentsByPostID(postID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(comments)
+}

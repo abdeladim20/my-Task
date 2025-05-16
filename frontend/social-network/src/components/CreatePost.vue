@@ -26,21 +26,35 @@ export default {
   },
   methods: {
     async createPost() {
-      const postData = {
-        user_id: Number(this.userID),
+      const newPost = {
+        user_id: 1,
         title: this.title,
         content: this.content,
         image: this.image || null,
         privacy: this.privacy
       };
+
       const res = await fetch("http://localhost:8080/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData)
+        body: JSON.stringify(newPost)
       });
+
+      if (!res.ok) {
+        const error = await res.text();
+        console.error("Post creation failed:", error);
+        alert("Post creation failed");
+        return;
+      }
+
       const data = await res.json();
-      console.log("Created Post:", data);
-      alert("Post created!");
+      this.$emit("post-created", data);
+
+      // Reset form
+      this.title = "";
+      this.content = "";
+      this.image = "";
+      this.privacy = "public";
     }
   }
 };

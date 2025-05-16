@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>📝 My Social Network</h1>
-    <CreatePost />
+    <!-- <CreatePost /> -->
     <PostList />
   </div>
 </template>
@@ -12,7 +12,7 @@ import PostList from "./components/PostList.vue";
 
 export default {
   components: {
-    CreatePost,
+    // CreatePost,
     PostList
   }
 };

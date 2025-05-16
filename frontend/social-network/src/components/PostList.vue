@@ -1,5 +1,6 @@
 <template>
   <div>
+    <CreatePost @post-created="addPost" />
     <h2>Posts</h2>
     <div v-for="post in posts" :key="post.id" style="border:1px solid #ccc; margin:10px; padding:10px;">
       <p><strong>{{ post.title }}</strong></p>
@@ -25,6 +26,8 @@
 </template>
 
 <script>
+import CreatePost from "./CreatePost.vue";
+
 export default {
   data() {
     return {
@@ -37,41 +40,48 @@ export default {
       const res = await fetch("http://localhost:8080/posts");
       const posts = await res.json();
 
-      // For each post, load its comments
-      // for (const post of posts) {
-      //   const res = await fetch(`http://localhost:8080/comments/${post.id}`);
-      //   const comments = await res.json();
-      //   post.comments = comments;
-      // }
+      for (const post of posts) {
+        const res = await fetch(`http://localhost:8080/posts/${post.id}/comments`);
+        const comments = await res.json();
+        post.comments = comments;
+      }
 
       this.posts = posts;
     },
-    // async createComment(postID) {
-    //   const content = this.newComments[postID];
-    //   if (!content) return alert("Write something first!");
 
-    //   const commentData = {
-    //     post_id: postID,
-    //     user_id: 1, // hardcoded user 1 for now
-    //     content: content
-    //   };
+    addPost(newPost) {
+      // Directly insert post with empty comments
+      this.posts.unshift({ ...newPost, comments: [] });
+    },
 
-    //   await fetch("http://localhost:8080/comments", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(commentData)
-    //   });
+    async createComment(postID) {
+      const content = this.newComments[postID];
+      if (!content) return alert("Write something first!");
 
-    //   alert("Comment added!");
-    //   this.newComments[postID] = "";
-    //   this.fetchPosts(); // refresh posts & comments
-    // }
+      const commentData = {
+        post_id: postID,
+        user_id: 1,
+        content: content
+      };
+
+      await fetch("http://localhost:8080/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(commentData)
+      });
+
+      alert("Comment added!");
+      this.newComments[postID] = "";
+      this.fetchPosts();
+    }
   },
   mounted() {
     this.fetchPosts();
+  },
+  components: {
+    CreatePost
   }
 };
-
 </script>
 
 <style scoped>
@@ -79,5 +89,4 @@ h2 {
   align-items: center;
   text-align: center;
 }
-
 </style>
