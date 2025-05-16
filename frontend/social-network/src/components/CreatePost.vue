@@ -13,50 +13,46 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      userID: "",
-      title: "",
-      content: "",
-      image: "",
-      privacy: "public",
-    };
-  },
-  methods: {
-    async createPost() {
-      const newPost = {
-        user_id: 1,
-        title: this.title,
-        content: this.content,
-        image: this.image || null,
-        privacy: this.privacy
-      };
+<script setup>
+import { ref, defineEmits } from "vue";
 
-      const res = await fetch("http://localhost:8080/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPost)
-      });
+const emit = defineEmits(["post-created"]);
 
-      if (!res.ok) {
-        const error = await res.text();
-        console.error("Post creation failed:", error);
-        alert("Post creation failed");
-        return;
-      }
+const title = ref("");
+const content = ref("");
+const image = ref("");
+const privacy = ref("public");
 
-      const data = await res.json();
-      this.$emit("post-created", data);
+const createPost = async () => {
+  const newPost = {
+    user_id: 1,
+    title: title.value,
+    content: content.value,
+    image: image.value || null,
+    privacy: privacy.value
+  };
 
-      // Reset form
-      this.title = "";
-      this.content = "";
-      this.image = "";
-      this.privacy = "public";
-    }
+  const res = await fetch("http://localhost:8080/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newPost)
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    console.error("Post creation failed:", error);
+    alert("Post creation failed");
+    return;
   }
+
+  const data = await res.json();
+  emit("post-created", data);
+
+  // Reset form
+  title.value = "";
+  content.value = "";
+  image.value = "";
+  privacy.value = "public";
 };
 </script>
 

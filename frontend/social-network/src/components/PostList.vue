@@ -25,63 +25,52 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import CreatePost from "./CreatePost.vue";
 
-export default {
-  data() {
-    return {
-      posts: [],
-      newComments: {}
-    };
-  },
-  methods: {
-    async fetchPosts() {
-      const res = await fetch("http://localhost:8080/posts");
-      const posts = await res.json();
+const posts = ref([]);
+const newComments = ref({});
 
-      for (const post of posts) {
-        const res = await fetch(`http://localhost:8080/posts/${post.id}/comments`);
-        const comments = await res.json();
-        post.comments = comments;
-      }
+const fetchPosts = async () => {
+  const res = await fetch("http://localhost:8080/posts");
+  const data = await res.json();
 
-      this.posts = posts;
-    },
-
-    addPost(newPost) {
-      // Directly insert post with empty comments
-      this.posts.unshift({ ...newPost, comments: [] });
-    },
-
-    async createComment(postID) {
-      const content = this.newComments[postID];
-      if (!content) return alert("Write something first!");
-
-      const commentData = {
-        post_id: postID,
-        user_id: 1,
-        content: content
-      };
-
-      await fetch("http://localhost:8080/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(commentData)
-      });
-
-      alert("Comment added!");
-      this.newComments[postID] = "";
-      this.fetchPosts();
-    }
-  },
-  mounted() {
-    this.fetchPosts();
-  },
-  components: {
-    CreatePost
+  for (const post of data) {
+    const commentRes = await fetch(`http://localhost:8080/posts/${post.id}/comments`);
+    const comments = await commentRes.json();
+    post.comments = comments;
   }
+
+  posts.value = data;
 };
+
+const addPost = (newPost) => {
+  posts.value.unshift({ ...newPost, comments: [] });
+};
+
+const createComment = async (postID) => {
+  const content = newComments.value[postID];
+  if (!content) return alert("Write something first!");
+
+  const commentData = {
+    post_id: postID,
+    user_id: 1,
+    content: content
+  };
+
+  await fetch("http://localhost:8080/comments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(commentData)
+  });
+
+  alert("Comment added!");
+  newComments.value[postID] = "";
+  await fetchPosts();
+};
+
+onMounted(fetchPosts);
 </script>
 
 <style scoped>
