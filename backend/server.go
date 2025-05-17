@@ -15,36 +15,25 @@ func main() {
 	// Connect to the database
 	sqlite.Connect()
 
+	// Perform migration
+	sqlite.HelpeMegration()
+
 	// Create a new router
 	router := mux.NewRouter()
 
-	// Register your routes
+	// Register routes
 	routes.RegisterRoutes(router)
 
-	// Set up the CORS options
+	// Set up CORS middleware
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"}, 
+		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
-		AllowCredentials: true, // Allow cookies
+		AllowCredentials: true,
 	})
 
-	// Apply the CORS middleware
+	// Wrap router with CORS middleware
 	handler := corsHandler.Handler(router)
-
-	// Handle OPTIONS requests
-	router.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173") 
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		// POST/GET logic here
-	})
-
-	sqlite.HelpeMegration()
 
 	log.Println("Server running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", handler))

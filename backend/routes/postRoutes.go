@@ -2,35 +2,74 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 
 	"social-network/backend/pkg/db/sqlite"
 	"social-network/backend/pkg/models"
 )
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
-	var post models.Post
-
-	// Decode JSON
-	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	err := r.ParseMultipartForm(10 << 20) // 10MB max
+	if err != nil {
+		http.Error(w, "Cannot parse form", http.StatusBadRequest)
 		return
 	}
 
-	// Check required fields
-	if post.UserID == 0 || post.Content == "" || post.Title == "" {
-		http.Error(w, "UserID, title and Content are required", http.StatusBadRequest)
+	// Get form values
+	userIDStr := r.FormValue("user_id")
+	title := r.FormValue("title")
+	content := r.FormValue("content")
+	privacy := r.FormValue("privacy")
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil || userID == 0 || title == "" || content == "" {
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	// Create post using model
+	var imagePath *string
+
+	// Get the file from form input "image"
+	file, handler, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		// Create a destination file
+		filename := fmt.Sprintf("uploads/%d_%s", time.Now().UnixNano(), handler.Filename)
+		dst, err := os.Create(filename)
+		if err != nil {
+			http.Error(w, "Unable to save the file", http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+
+		// Copy uploaded file to destination
+		if _, err := io.Copy(dst, file); err != nil {
+			http.Error(w, "Unable to save the file", http.StatusInternalServerError)
+			return
+		}
+
+		imagePath = &filename
+	}
+
+	post := models.Post{
+		UserID:  userID,
+		Title:   title,
+		Content: content,
+		Privacy: privacy,
+		Image:   imagePath,
+	}
+
 	if err := post.Create(); err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return
 	}
 
-	// Return created post
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
 }

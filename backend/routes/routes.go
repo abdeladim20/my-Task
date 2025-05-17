@@ -19,5 +19,7 @@ func RegisterRoutes(router *mux.Router) {
 	// Comment routes
 	router.HandleFunc("/comments", CreateComment).Methods("POST")
 	router.HandleFunc("/posts/{postID}/comments", GetCommentsByPostID).Methods("GET")
-	
+
+	// Serve uploaded images statically
+	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads/"))))
 }

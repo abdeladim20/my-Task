@@ -4,6 +4,7 @@
     <form @submit.prevent="createPost">
       <textarea v-model="title" placeholder="Post title" required></textarea>
       <textarea v-model="content" placeholder="Post content" required></textarea>
+      <input type="file" @change="onFileChange" />
       <select v-model="privacy">
         <option value="public">Public</option>
         <option value="private">Private</option>
@@ -14,28 +15,38 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from "vue";
+import { ref } from "vue";
 
-const emit = defineEmits(["post-created"]);
+// const emit = defineEmits(["post-created"]);
 
 const title = ref("");
 const content = ref("");
-const image = ref("");
+const imageFile = ref(null);
 const privacy = ref("public");
 
+const onFileChange = (event) => {
+  const files = event.target.files;
+  if (files.length > 0) {
+    imageFile.value = files[0];
+  } else {
+    imageFile.value = null;
+  }
+};
+
 const createPost = async () => {
-  const newPost = {
-    user_id: 1,
-    title: title.value,
-    content: content.value,
-    image: image.value || null,
-    privacy: privacy.value
-  };
+  const formData = new FormData();
+  formData.append("user_id", 1);
+  formData.append("title", title.value);
+  formData.append("content", content.value);
+  formData.append("privacy", privacy.value);
+
+  if (imageFile.value) {
+    formData.append("image", imageFile.value);
+  }
 
   const res = await fetch("http://localhost:8080/posts", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newPost)
+    body: formData,
   });
 
   if (!res.ok) {
@@ -51,8 +62,11 @@ const createPost = async () => {
   // Reset form
   title.value = "";
   content.value = "";
-  image.value = "";
+  imageFile.value = null;
   privacy.value = "public";
+
+  // Clear the file input element
+  document.querySelector('input[type="file"]').value = null;
 };
 </script>
 
