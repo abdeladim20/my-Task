@@ -2,24 +2,48 @@ package routes
 
 import (
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(router *mux.Router) {
-	// test check route
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome to the Social Network!"))
-	}).Methods("GET")
+func RegisterRoutes(mux *http.ServeMux) {
+	// Test check route
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			w.Write([]byte("Welcome to the Social Network!"))
+		} else {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
 
 	// Post routes
-	router.HandleFunc("/posts", CreatePost).Methods("POST")
-	router.HandleFunc("/posts", GetPosts).Methods("GET")
+	mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			CreatePost(w, r)
+		case http.MethodGet:
+			GetPosts(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
 
 	// Comment routes
-	router.HandleFunc("/comments", CreateComment).Methods("POST")
-	router.HandleFunc("/posts/{postID}/comments", GetCommentsByPostID).Methods("GET")
+	mux.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			CreateComment(w, r)
+		} else {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Handle dynamic post comment routes
+	mux.HandleFunc("/posts/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			GetCommentsByPostID(w, r)
+			return
+		}
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	})
 
 	// Serve uploaded images statically
-	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads/"))))
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads/"))))
 }

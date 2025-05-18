@@ -6,8 +6,7 @@ import (
 	"social-network/backend/pkg/models"
 	"social-network/backend/utils"
 	"strconv"
-
-	"github.com/gorilla/mux"
+	"strings"
 )
 
 func CreateComment(w http.ResponseWriter, r *http.Request) {
@@ -69,21 +68,26 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	postIdASstring := vars["postID"]
-	postID, err := strconv.Atoi(postIdASstring)
+	// Extract the postID from the URL
+	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/posts/"), "/")
+	if len(pathParts) < 2 || pathParts[1] != "comments" {
+		http.Error(w, "Invalid URL", http.StatusNotFound)
+		return
+	}
+
+	postIDStr := pathParts[0]
+	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
 		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Invalid post ID")
-		// http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
 	comments, err := models.GetCommentsByPostID(postID)
 	if err != nil {
 		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "GetCommentsByPostID Failed")
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comments)
 }
