@@ -93,7 +93,7 @@ const createComment = async (postID) => {
     alert("Failed to add comment: " + error);
     return;
   }
-
+  
   alert("Comment added!");
   newComments.value[postID] = "";
   await fetchPosts();

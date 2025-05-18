@@ -12,7 +12,8 @@ import (
 
 func CreateComment(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		http.Error(w, "Could not parse multipart form", http.StatusBadRequest)
+		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Could not parse multipart form")
+		// http.Error(w, "Could not parse multipart form", http.StatusBadRequest)
 		return
 	}
 
@@ -21,7 +22,8 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		path, err := utils.SaveUploadedImage(file, handler)
 		if err != nil {
-			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to save image")
+			// http.Error(w, "Failed to save image", http.StatusInternalServerError)
 			return
 		}
 		imagePath = &path
@@ -33,16 +35,19 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil || postID == 0 {
-		http.Error(w, "Invalid or missing post_id", http.StatusBadRequest)
+		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Invalid or missing post_id")
+		// http.Error(w, "Invalid or missing post_id", http.StatusBadRequest)
 		return
 	}
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil || userID == 0 {
-		http.Error(w, "Invalid or missing user_id", http.StatusBadRequest)
+		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Invalid or missing user_id")
+		// http.Error(w, "Invalid or missing user_id", http.StatusBadRequest)
 		return
 	}
 	if content == "" {
-		http.Error(w, "Content is required", http.StatusBadRequest)
+		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Content is required")
+		// http.Error(w, "Content is required", http.StatusBadRequest)
 		return
 	}
 
@@ -54,7 +59,8 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := comment.Create(); err != nil {
-		http.Error(w, "Failed to create comment", http.StatusInternalServerError)
+		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to create comment")
+		// http.Error(w, "Failed to create comment", http.StatusInternalServerError)
 		return
 	}
 
@@ -67,13 +73,15 @@ func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
 	postIdASstring := vars["postID"]
 	postID, err := strconv.Atoi(postIdASstring)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Invalid post ID")
+		// http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
 	comments, err := models.GetCommentsByPostID(postID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "GetCommentsByPostID Failed")
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

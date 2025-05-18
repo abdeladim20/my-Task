@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"social-network/backend/pkg/db/sqlite"
+	"social-network/backend/utils"
 )
 
 type Post struct {
@@ -43,7 +44,8 @@ func (p *Post) Create() error {
 func GetPosts(w http.ResponseWriter, r *http.Request) {
 	rows, err := sqlite.DB.Query("SELECT id, user_id, title, content, image, privacy, created_at, updated_at FROM posts ORDER BY created_at DESC")
 	if err != nil {
-		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
+		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to fetch posts")
+		// http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -51,7 +53,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.ID, &post.UserID,&post.Title ,&post.Content, &post.Image, &post.Privacy, &post.CreatedAt, &post.UpdatedAt); err != nil {
+		if err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.Image, &post.Privacy, &post.CreatedAt, &post.UpdatedAt); err != nil {
 			continue
 		}
 
