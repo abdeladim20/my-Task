@@ -18,7 +18,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20) // 10MB max
 	if err != nil {
 		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Cannot parse form")
-		// http.Error(w, "Cannot parse form", http.StatusBadRequest)
 		return
 	}
 
@@ -31,7 +30,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil || userID == 0 || title == "" || content == "" {
 		utils.CreateResponseAndLogger(w, http.StatusBadRequest, err, "Missing required fields")
-		// http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
@@ -46,7 +44,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		dst, err := os.Create(filename)
 		if err != nil {
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save the file")
-			// http.Error(w, "Unable to save the file", http.StatusInternalServerError)
 			return
 		}
 		defer dst.Close()
@@ -54,7 +51,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		// Copy uploaded file to destination
 		if _, err := io.Copy(dst, file); err != nil {
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save the file")
-			// http.Error(w, "Unable to save the file", http.StatusInternalServerError)
 			return
 		}
 
@@ -71,7 +67,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if err := post.Create(); err != nil {
 		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to create post")
-		// http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return
 	}
 
@@ -83,8 +78,6 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	rows, err := sqlite.DB.Query("SELECT id, user_id, title, content, image, privacy, created_at, updated_at FROM posts ORDER BY created_at DESC")
 	if err != nil {
 		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to fetch posts")
-		// log.Println("Failed to fetch posts:", err)
-		// http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -93,13 +86,12 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.Image, &post.Privacy, &post.CreatedAt, &post.UpdatedAt); err != nil {
-			// log.Println("Failed to scan post:", err)
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to scan post")
+			// log.Println("Failed to scan post:", err)
 			continue
 		}
 		posts = append(posts, post)
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }

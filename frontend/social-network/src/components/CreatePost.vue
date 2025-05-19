@@ -17,7 +17,7 @@
 <script setup>
 import { ref } from "vue";
 
-// const emit = defineEmits(["post-created"]);
+const emit = defineEmits(["post-created"]);
 
 const title = ref("");
 const content = ref("");

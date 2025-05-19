@@ -13,7 +13,7 @@ func SaveUploadedImage(file multipart.File, handler *multipart.FileHeader) (stri
 
 	// Sanitize the filename to avoid any directory traversal issues
 	filename := time.Now().Format("20060102150405") + "_" + filepath.Base(handler.Filename)
-	saveDir := "static/uploads/"
+	saveDir := "/backend/static/uploads/"
 
 	// Make sure the directory exists before creating the file
 	if err := os.MkdirAll(saveDir, os.ModePerm); err != nil {

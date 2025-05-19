@@ -2,21 +2,14 @@
   <div>
     <CreatePost @post-created="addPost" />
     <h2>Posts</h2>
-    <div
-      v-for="post in posts"
-      :key="post.id"
-      style="border:1px solid #ccc; margin:10px; padding:10px;"
-    >
+    <div v-for="post in posts" :key="post.id" style="border:1px solid #ccc; margin:10px; padding:10px;">
       <p><strong>{{ post.title }}</strong></p>
       <p><strong>User {{ post.user_id }}:</strong> {{ post.content }}</p>
 
       <!-- Display post image -->
       <p v-if="post.image">
-        <img
-          :src="post.image"
-          alt="Post image"
-          style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem;"
-        />
+        <img :src="post.image" alt="Post image"
+          style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem;" />
       </p>
 
       <p>Privacy: {{ post.privacy }}</p>
@@ -24,24 +17,26 @@
       <!-- Comments -->
       <div v-if="post.comments && post.comments.length > 0">
         <h4>Comments:</h4>
-        <div
-          v-for="comment in post.comments"
-          :key="comment.id"
-          style="margin-left:10px;"
-        >
+        <div v-for="comment in post.comments" :key="comment.id" style="margin-left:10px;">
           🗨️ User {{ comment.user_id }}: {{ comment.content }}
         </div>
       </div>
 
       <!-- Add Comment Form -->
-      <form @submit.prevent="createComment(post.id)" style="margin-top:10px;">
+      <!-- <form @submit.prevent="createComment(post.id)" style="margin-top:10px;">
         <input
           v-model="newComments[post.id]"
           placeholder="Write a comment"
           type="text"
         />
         <button type="submit">Comment</button>
+      </form> -->
+      <form @submit.prevent="createComment(post.id)" style="margin-top:10px;">
+        <input v-model="newComments[post.id]" placeholder="Write a comment" type="text" />
+        <input type="file" :id="`file-${post.id}`" accept="image/*" style="margin-left: 10px;" />
+        <button type="submit">Comment</button>
       </form>
+
     </div>
   </div>
 </template>
@@ -74,29 +69,37 @@ const addPost = (newPost) => {
 
 const createComment = async (postID) => {
   const content = newComments.value[postID];
-  if (!content) return alert("Write something first!");
+  const fileInput = document.querySelector(`#file-${postID}`);
+  const file = fileInput?.files[0];
 
-  const commentData = {
-    post_id: postID,
-    user_id: 1,
-    content: content,
-  };
+  if (!content && !file) return alert("Write something or select a file!");
 
-  const res = await fetch("http://localhost:8080/comments", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(commentData),
-  });
+  const formData = new FormData();
+  formData.append("post_id", postID);
+  formData.append("user_id", 1);
+  if (content) formData.append("content", content);
+  if (file) formData.append("image", file);
 
-  if (!res.ok) {
-    const error = await res.text();
-    alert("Failed to add comment: " + error);
-    return;
+  try {
+    const res = await fetch("http://localhost:8080/comments", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const error = await res.text();
+      alert("Failed to add comment: " + error);
+      return;
+    }
+
+    alert("Comment added!");
+    newComments.value[postID] = "";
+    fileInput.value = "";
+    await fetchPosts();
+  } catch (err) {
+    console.error("Failed to add comment:", err);
+    alert("Failed to add comment. Please try again later.");
   }
-  
-  alert("Comment added!");
-  newComments.value[postID] = "";
-  await fetchPosts();
 };
 
 onMounted(fetchPosts);
