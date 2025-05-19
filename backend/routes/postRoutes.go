@@ -40,7 +40,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		defer file.Close()
 		// Create a destination file
-		filename := fmt.Sprintf("uploads/%d_%s", time.Now().UnixNano(), handler.Filename)
+		filename := fmt.Sprintf("backend/static/uploads/%d_%s", time.Now().UnixNano(), handler.Filename)
+		// filename := fmt.Sprintf("static/uploads/%d_%s", time.Now().UnixNano(), handler.Filename)
 		dst, err := os.Create(filename)
 		if err != nil {
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save the file")
