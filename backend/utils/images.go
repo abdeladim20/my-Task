@@ -13,7 +13,7 @@ func SaveUploadedImage(file multipart.File, handler *multipart.FileHeader) (stri
 
 	// Generate a unique filename using the current timestamp
 	filename := time.Now().Format("20060102150405") + "_" + filepath.Base(handler.Filename)
-	saveDir := "static/uploads/"  // Corrected path
+	saveDir := "backend/static/uploads/" // Corrected path
 
 	// Make sure the directory exists
 	if err := os.MkdirAll(saveDir, 0o755); err != nil {
@@ -34,5 +34,5 @@ func SaveUploadedImage(file multipart.File, handler *multipart.FileHeader) (stri
 	}
 
 	// Return the relative path from the web server's perspective (for frontend use)
-	return "/static/uploads/" + filename, nil
+	return "static/uploads/" + filename, nil
 }

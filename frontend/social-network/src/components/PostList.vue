@@ -8,7 +8,7 @@
 
       <!-- Display post image -->
       <p v-if="post.image">
-        <img :src="post.image" alt="Post image"
+        <img :src="`http://localhost:8080/${post.image}`" alt="Post image"
           style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem;" />
       </p>
 
@@ -18,19 +18,15 @@
       <div v-if="post.comments && post.comments.length > 0">
         <h4>Comments:</h4>
         <div v-for="comment in post.comments" :key="comment.id" style="margin-left:10px;">
+          <p v-if="comment.image">
+            <img :src="`http://localhost:8080/${comment.image}`" alt="comment image"
+              style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem;" />
+          </p>
           🗨️ User {{ comment.user_id }}: {{ comment.content }}
         </div>
       </div>
 
       <!-- Add Comment Form -->
-      <!-- <form @submit.prevent="createComment(post.id)" style="margin-top:10px;">
-        <input
-          v-model="newComments[post.id]"
-          placeholder="Write a comment"
-          type="text"
-        />
-        <button type="submit">Comment</button>
-      </form> -->
       <form @submit.prevent="createComment(post.id)" style="margin-top:10px;">
         <input v-model="newComments[post.id]" placeholder="Write a comment" type="text" />
         <input type="file" :id="`file-${post.id}`" accept="image/*" style="margin-left: 10px;" />

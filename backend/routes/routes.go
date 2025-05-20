@@ -45,7 +45,6 @@ func RegisterRoutes(mux *http.ServeMux) {
 	})
 
 	// Serve uploaded images statically
-	// mux.Handle("/static/uploads/", http.StripPrefix("/static/uploads", http.FileServer(http.Dir("./backend/static/uploads"))))
-	mux.Handle("/static/uploads/", http.StripPrefix("/static/uploads/", http.FileServer(http.Dir("./backend/static/uploads"))))
+	mux.Handle("/static/uploads/", http.StripPrefix("/static/uploads", http.FileServer(http.Dir("./backend/static/uploads"))))
 
 }

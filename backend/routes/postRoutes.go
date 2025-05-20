@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"social-network/backend/pkg/db/sqlite"
@@ -41,7 +42,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		// Create a destination file
 		filename := fmt.Sprintf("backend/static/uploads/%d_%s", time.Now().UnixNano(), handler.Filename)
-		// filename := fmt.Sprintf("static/uploads/%d_%s", time.Now().UnixNano(), handler.Filename)
 		dst, err := os.Create(filename)
 		if err != nil {
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save the file")
@@ -54,8 +54,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save the file")
 			return
 		}
-
-		imagePath = &filename
+		new := strings.Replace(filename, "backend/", "", 1)
+		imagePath = &new
 	}
 
 	post := models.Post{
@@ -88,7 +88,6 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.Image, &post.Privacy, &post.CreatedAt, &post.UpdatedAt); err != nil {
 			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to scan post")
-			// log.Println("Failed to scan post:", err)
 			continue
 		}
 		posts = append(posts, post)
