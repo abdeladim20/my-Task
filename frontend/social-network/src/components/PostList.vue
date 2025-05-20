@@ -2,25 +2,27 @@
   <div>
     <CreatePost @post-created="addPost" />
     <h2>Posts</h2>
-    <div v-for="post in posts" :key="post.id" style="border:1px solid #ccc; margin:10px; padding:10px;">
-      <p><strong>{{ post.title }}</strong></p>
-      <p><strong>User {{ post.user_id }}:</strong> {{ post.content }}</p>
+    <div v-for="post in posts" :key="post.id"
+      style="border:1px solid #ccc; margin:10px; padding:10px; align-items: center; justify-content: center; text-align: center;">
+      <p><strong>Title: {{ post.title }}</strong></p>
+      <strong>User {{ post.user_id }}:</strong>
+      <P><strong>Post Content:</strong> {{ post.content }}</P>
 
       <!-- Display post image -->
       <p v-if="post.image">
         <img :src="`http://localhost:8080/${post.image}`" alt="Post image"
-          style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem;" />
+          style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem; margin: auto;" />
       </p>
 
       <p>Privacy: {{ post.privacy }}</p>
 
       <!-- Comments -->
       <div v-if="post.comments && post.comments.length > 0">
-        <h4>Comments:</h4>
+        <h3>Comments:</h3>
         <div v-for="comment in post.comments" :key="comment.id" style="margin-left:10px;">
           <p v-if="comment.image">
             <img :src="`http://localhost:8080/${comment.image}`" alt="comment image"
-              style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem;" />
+              style="max-width: 100%; max-height: 300px; display: block; margin-top: 0.5rem; margin: auto;" />
           </p>
           🗨️ User {{ comment.user_id }}: {{ comment.content }}
         </div>
@@ -30,6 +32,7 @@
       <form @submit.prevent="createComment(post.id)" style="margin-top:10px;">
         <input v-model="newComments[post.id]" placeholder="Write a comment" type="text" />
         <input type="file" :id="`file-${post.id}`" accept="image/*" style="margin-left: 10px;" />
+        <br />
         <button type="submit">Comment</button>
       </form>
 
