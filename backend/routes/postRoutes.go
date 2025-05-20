@@ -51,7 +51,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		// Copy uploaded file to destination
 		if _, err := io.Copy(dst, file); err != nil {
-			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save the file")
+			utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Unable to save Copie of the file")
 			return
 		}
 		new := strings.Replace(filename, "backend/", "", 1)

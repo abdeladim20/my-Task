@@ -7,6 +7,7 @@
       <input type="file" @change="onFileChange" />
       <select v-model="privacy">
         <option value="public">Public</option>
+        <option value="almost-private">Almost-Private</option>
         <option value="private">Private</option>
       </select>
       <button type="submit">Post</button>
