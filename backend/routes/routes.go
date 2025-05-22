@@ -44,7 +44,15 @@ func RegisterRoutes(mux *http.ServeMux) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	})
 
+	// Reaction route
+	mux.HandleFunc("/posts/react", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			HandleReactToPost(w, r)
+		} else {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
 	// Serve uploaded images statically
 	mux.Handle("/static/uploads/", http.StripPrefix("/static/uploads", http.FileServer(http.Dir("./backend/static/uploads"))))
-
 }

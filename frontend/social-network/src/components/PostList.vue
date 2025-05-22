@@ -108,6 +108,50 @@ const createComment = async (postID) => {
   }
 };
 
+const userID = 1
+const likePost = async (postID) => {
+  try {
+    const res = await fetch("http://localhost:8080/posts/react", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        post_id: postID,
+        user_id: userID,
+        type: "like"
+      })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const post = posts.value.find(p => p.id === postID);
+    if (post) post.likes = (post.likes || 0) + 1;
+    console.log("Reaction saved successfully!");
+  } catch (err) {
+    console.error("Failed to like post:", err);
+    alert("Error liking post.");
+  }
+};
+
+const dislikePost = async (postID) => {
+  try {
+    const res = await fetch("http://localhost:8080/posts/react", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        post_id: postID,
+        user_id: userID,
+        type: "dislike"
+      })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+    const post = posts.value.find(p => p.id === postID);
+    if (post) post.dislikes = (post.dislikes || 0) + 1;
+    console.log("Reaction saved successfully!");
+  } catch (err) {
+    console.error("Failed to dislike post:", err);
+    alert("Error disliking post.");
+  }
+};
+
 onMounted(fetchPosts);
 </script>
 
