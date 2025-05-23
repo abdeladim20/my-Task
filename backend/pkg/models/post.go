@@ -16,6 +16,8 @@ type Post struct {
 	Content   string    `json:"content"`
 	Image     *string   `json:"image,omitempty"`
 	Privacy   string    `json:"privacy"`
+	Likes     int       `json:"likes"`
+	Dislikes  int       `json:"dislikes"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Comments  []Comment `json:"comments,omitempty"`
@@ -40,6 +42,20 @@ func (p *Post) Create() error {
 	return nil
 }
 
+func GetReactionCounts(postID int) (likes int, dislikes int, err error) {
+	err = sqlite.DB.QueryRow(`
+		SELECT COUNT(*) FROM reactions WHERE post_id = ? AND type = 'like'
+	`, postID).Scan(&likes)
+	if err != nil {
+		return
+	}
+
+	err = sqlite.DB.QueryRow(`
+		SELECT COUNT(*) FROM reactions WHERE post_id = ? AND type = 'dislike'
+	`, postID).Scan(&dislikes)
+	return
+}
+
 // Get all posts
 func GetPosts(w http.ResponseWriter, r *http.Request) {
 	rows, err := sqlite.DB.Query("SELECT id, user_id, title, content, image, privacy, created_at, updated_at FROM posts ORDER BY created_at DESC")
@@ -56,12 +72,12 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 		if err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.Image, &post.Privacy, &post.CreatedAt, &post.UpdatedAt); err != nil {
 			continue
 		}
-
-		// Fetch comments for this post
-		// comments, err := GetCommentsByPostID(post.ID)
-		// if err == nil {
-		// 	post.Comments = comments
-		// }
+		// Count reactions
+		likes, dislikes, err := GetReactionCounts(post.ID)
+		if err == nil {
+			post.Likes = likes
+			post.Dislikes = dislikes
+		}
 
 		posts = append(posts, post)
 	}
@@ -69,3 +85,5 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }
+
+

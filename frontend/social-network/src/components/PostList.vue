@@ -121,9 +121,12 @@ const likePost = async (postID) => {
       })
     });
     if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
     const post = posts.value.find(p => p.id === postID);
-    if (post) post.likes = (post.likes || 0) + 1;
-    console.log("Reaction saved successfully!");
+    if (post) {
+      post.likes = data.likes;
+      post.dislikes = data.dislikes;
+    }
   } catch (err) {
     console.error("Failed to like post:", err);
     alert("Error liking post.");
@@ -141,16 +144,19 @@ const dislikePost = async (postID) => {
         type: "dislike"
       })
     });
-
     if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
     const post = posts.value.find(p => p.id === postID);
-    if (post) post.dislikes = (post.dislikes || 0) + 1;
-    console.log("Reaction saved successfully!");
+    if (post) {
+      post.likes = data.likes;
+      post.dislikes = data.dislikes;
+    }
   } catch (err) {
     console.error("Failed to dislike post:", err);
     alert("Error disliking post.");
   }
 };
+
 
 onMounted(fetchPosts);
 </script>

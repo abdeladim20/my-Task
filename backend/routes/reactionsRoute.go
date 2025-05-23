@@ -38,6 +38,23 @@ func HandleReactToPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	likes, err := models.CountReactions(req.PostID, "like")
+	if err != nil {
+		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to count likes")
+		return
+	}
+	dislikes, err := models.CountReactions(req.PostID, "dislike")
+	if err != nil {
+		utils.CreateResponseAndLogger(w, http.StatusInternalServerError, err, "Failed to count dislikes")
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Reaction saved"})
+	json.NewEncoder(w).Encode(map[string]any{
+		"message":  "Reaction saved",
+		"likes":    likes,
+		"dislikes": dislikes,
+	})
+
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Reaction saved"})
 }
